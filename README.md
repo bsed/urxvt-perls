@@ -156,3 +156,37 @@ Install:
 
     URxvt.perl-ext-common: ...,tabbedex
     ...
+
+Calls to be able to open tabs via scripts have been added.
+
+This is an example script to start some tabs with commands in them, which can
+be started either with 
+$ ./startup_script.sh
+or via
+$ urxvt -e './startup_script.sh'
+
+startup_script.sh:
+
+printf "\033]777;tabbedex;new_tab\007"
+sleep 0.1
+printf "\033]777;tabbedex;make_current;1\007"
+printf "\033]777;tabbedex;set_tab_name;MAIL\007"
+
+printf "\033]777;tabbedex;new_tab;tmux\007"
+sleep 0.1
+printf "\033]777;tabbedex;make_current;2\007"
+printf "\033]777;tabbedex;set_tab_name;TMUX\007"
+
+printf "\033]777;tabbedex;new_tab\007"
+sleep 0.1
+printf "\033]777;tabbedex;make_current;3\007"
+printf "\033]777;tabbedex;set_tab_name;interactive\007"
+printf "\033]777;tabbedex;interactive_command;ls /; ls -R\007"
+
+printf "\033]777;tabbedex;new_tab\007"
+sleep 0.1
+printf "\033]777;tabbedex;make_current;4\007"
+printf "\033]777;tabbedex;set_tab_name;interactive\007"
+printf "\033]777;tabbedex;interactive_command;ls /; ls -R /\007"
+
+sleep 0.1;
