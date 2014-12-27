@@ -151,7 +151,7 @@
 ##   one).
 ##
 
-use Data::Dumper;
+#use Data::Dumper;
 
 use Encode qw(decode);
 
@@ -874,7 +874,7 @@ sub tab_osc_seq_perl {
       1;
     }
 
-    if ($tab_command eq "interactive_command") {
+    if ($tab_command eq "interactive_command" or $tab_command eq "interactive_key" ) {
       my (@commands) = split /;/, $osc;
       #print Dumper @commands;
 
@@ -882,7 +882,10 @@ sub tab_osc_seq_perl {
         $_ = $self->locale_encode($_);
       }
 
-      my $write_string = join ';' , @commands , "\n";
+#      my $write_string = $commands[0];
+#      my $write_string = join ';' , @commands if($#commands > 1);
+      my $write_string = join ';' , @commands;
+      $write_string .= "\n" if ($tab_command eq "interactive_command");
       $self->tt_write( $write_string);
 
       1;
