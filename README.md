@@ -171,7 +171,9 @@ startup_script.sh:
     sleep 0.1
     printf "\033]777;tabbedex;make_current;1\007"
     printf "\033]777;tabbedex;set_tab_name;MAIL\007"
-  
+    printf "\033]777;tabbedex;interactive_command;pine\007"
+    printf "\033]777;tabbedex;make_current;1\007" 
+
     printf "\033]777;tabbedex;new_tab;tmux\007"
     sleep 0.1
     printf "\033]777;tabbedex;make_current;2\007"
