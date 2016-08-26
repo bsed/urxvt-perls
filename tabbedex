@@ -300,7 +300,6 @@ Sets name of the current tab to I<name>.
 =cut
 
 use Encode qw(decode);
-use Time::HiRes qw( usleep);
 
 sub update_autohide {
    my ($self, $reconfigure) = @_;
@@ -454,7 +453,7 @@ sub refresh {
 
 
 sub new_tab {
-   my ($self) = @_;
+   my ($self, @argv) = @_;
 
    unless ($self->{autohide} &&
            !(defined $self->{tabs} && @{ $self->{tabs} })) {
@@ -487,10 +486,18 @@ sub new_tab {
 
    push @urxvt::TERM_EXT, urxvt::ext::tabbedex::tab::;
 
+   my @argv_list = ();
+   if ( $self->{tabs}[-1] == 0 ) {
+     @argv_list = ( @{ $self->{argv}} , @argv );
+   }
+   else {
+     @argv_list = @argv;
+   }
+
    my $term = new urxvt::term
       $self->env, $urxvt::RXVTNAME,
       -embed => $self->parent,
-      @{ $self->{argv} };
+      @argv_list;
 }
 
 
@@ -668,7 +675,6 @@ sub on_button_release {
       }
       return 1;
    }
-
    ();
 }
 
@@ -796,8 +802,6 @@ sub on_start {
                                    ->cb ( sub { $self->refresh; } );
    }
 
-
-   usleep 200000;
    ();
 }
 
