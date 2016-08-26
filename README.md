@@ -149,7 +149,7 @@ Install:
 tabbedex
 --------
 
-This plugin is huge and I don't use it. See the `tabbedex` file for an
+See the `tabbedex` file for an
 explanation and then feel free to contribute to this section.
 
 Install:
@@ -168,27 +168,27 @@ $ urxvt -e './startup_script.sh'
 startup_script.sh:
 
     printf "\033]777;tabbedex;new_tab\007"
-    sleep 0.1
+    sleep 0.4
     printf "\033]777;tabbedex;make_current;1\007"
     printf "\033]777;tabbedex;set_tab_name;MAIL\007"
     printf "\033]777;tabbedex;interactive_command;pine\007"
     printf "\033]777;tabbedex;interactive_key;i\007"
 
     printf "\033]777;tabbedex;new_tab;tmux\007"
-    sleep 0.1
+    sleep 0.4
     printf "\033]777;tabbedex;make_current;2\007"
     printf "\033]777;tabbedex;set_tab_name;TMUX\007"
     
     printf "\033]777;tabbedex;new_tab\007"
-    sleep 0.1
+    sleep 0.4
     printf "\033]777;tabbedex;make_current;3\007"
     printf "\033]777;tabbedex;set_tab_name;interactive\007"
     printf "\033]777;tabbedex;interactive_command;ls /; ls -R\007"
     
     printf "\033]777;tabbedex;new_tab\007"
-    sleep 0.1
+    sleep 0.4
     printf "\033]777;tabbedex;make_current;4\007"
     printf "\033]777;tabbedex;set_tab_name;interactive\007"
     printf "\033]777;tabbedex;interactive_command;ls /; ls -R /\007"
     
-    sleep 0.1;
+    sleep 0.2;
