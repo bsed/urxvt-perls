@@ -1029,12 +1029,15 @@ sub rename_tab {
                 $self->{is_inputting_name} = 0;
                 $tab->disable('key_press');
                 $self->update_autohide (1);
-            } elsif ($keysym == 0xff1b) { # escape
+              } elsif ($keysym == 0xff1b) { # escape
                 $tab->{name} = $tab->{old_name};
                 $self->{is_inputting_name} = 0;
+                $tab->disable('key_press');
                 $self->update_autohide (1);
-            } elsif ($keysym == 0xff08) { # backspace
-                substr $tab->{new_name}, -1, 1;
+              } elsif ($keysym == 0xff08) { # backspace
+                #my $substr = $tab->{new_name}, -1, 1, "";
+                #print "backspace pressed: name: '$tab->{new_name}' , subst: '$substr'\n";
+                substr $tab->{new_name}, -1, 1, "";
                 $tab->{name} = $tab->{new_name} . '█';
             } elsif ($octets !~ /[\x00-\x1f\x80-\xaf]/) {
                 $tab->{new_name} .= $octets;
