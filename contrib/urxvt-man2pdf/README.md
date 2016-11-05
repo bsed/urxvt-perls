@@ -12,18 +12,30 @@ You can also put it in a folder of your choice, but then you have to add this
 line to your **.Xdefaults/.Xresources**:
 
 ```bash
-# Don't type ~ or $HOME below
 URxvt.perl-lib: /home/user/your/folder/
-
-# extensions to activate
+# extension to activate
 URxvt.perl-ext-common           : man
 
-# keyboard shortcut to trigger the extension
+# keyboard shortcut to trigger the lib
 URxvt.keysym.Control-Shift-X    : perl:man:topdf
+```
+
+You can convert man pages with your mouse, by default this functionallity is disabled so not to confuse any other extensions, such as url-select.
+
+To enable this functionallity add the following to your **.Xdefaults/.Xresources**:
+
+```bash
+URxvt.perl-ext-common           : selection-to-clipboard,man
+
+# 3 is the "right" mouse click button
+URxvt.man2pdf.button: 3
+
+# Mark the man page name with
+# your left mouse button and right click
+# to start the conversion process
 ```
 
 # Requirements
 
 * libnotify (to let you know when convesion begins)
 * ghostscript
-* urxvt (rxvt-unicode) compiled with support for perl
