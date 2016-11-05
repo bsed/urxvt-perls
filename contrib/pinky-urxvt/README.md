@@ -39,7 +39,7 @@ Use your favourite 'echo, print, printf' command to update the status line.
 
 ```bash
 while true; do
-  printf '\033]777;pinky;update_line;%s\007' 'Hello World'
+  printf '\033]777;pinky;%s\007' 'Hello World'
   sleep 5
 done &  # <-- "daemon mode"
 ```
