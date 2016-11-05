@@ -14,15 +14,11 @@ line to your **.Xdefaults/.Xresources**:
 ```bash
 # Don't type ~ or $HOME below
 URxvt.perl-lib: /home/user/your/folder/
-```
 
-After installing, put the following lines in your **.Xdefaults/.Xresources**:
-
-```bash
 # extensions to activate
 URxvt.perl-ext-common           : man
 
-# keyboard shortcut to trigger the lib
+# keyboard shortcut to trigger the extension
 URxvt.keysym.Control-Shift-X    : perl:man:topdf
 ```
 
@@ -30,3 +26,4 @@ URxvt.keysym.Control-Shift-X    : perl:man:topdf
 
 * libnotify (to let you know when convesion begins)
 * ghostscript
+* urxvt (rxvt-unicode) compiled with support for perl
