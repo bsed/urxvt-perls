@@ -48,7 +48,7 @@ sub refresh {
 
 
 sub new_pinky_status_line {
-  my ($self, @argv) = @_;
+  my ($self) = @_;
 
   push @urxvt::TERM_INIT, sub {
     my ($term) = @_;
@@ -56,22 +56,16 @@ sub new_pinky_status_line {
 
     for (0 .. urxvt::NUM_RESOURCES - 1) {
       my $value = $self->{resource}[$_];
+
       if (defined $value) {
         $term->resource ("+$_" => $value);
       }
     }
 
-    foreach my $opt (keys %urxvt::OPTION) {
-      my $value = $self->{option}{$opt};
-      $term->option($urxvt::OPTION{$opt}, $value);
-    }
-
     $term->resource (perl_ext_2 =>
-      $term->resource ('perl_ext_2') .
-      $self->{perl_ext_blacklist}
+      $term->resource ('perl_ext_2') . ',-pinky'
     );
   };
-
   push @urxvt::TERM_EXT, urxvt::ext::pinky::pinky_status::;
 
   new urxvt::term $self->env, $urxvt::RXVTNAME,
@@ -90,6 +84,7 @@ sub rs_text {
 
 sub rs_color($$$$) {
   my ($self, $prefix, $def_fg, $def_bg) = @_;
+
   my $fg = $self->rs_text ($prefix . '-fg') // $def_fg;
   my $bg = $self->rs_text ($prefix . '-bg') // $def_bg;
 
@@ -99,11 +94,10 @@ sub rs_color($$$$) {
 
 sub make_pinky_window {
   my ($self, $statusLine) = @_;
-
   $self->{cur} = $statusLine;
 
-  $self->{cur}->XMoveResizeWindow (
-    $self->{cur}->parent,
+  $statusLine->XMoveResizeWindow (
+    $statusLine->parent,
     0, $self->{lineheight},
     $self->width,
     $self->height - $self->{lineheight}
@@ -111,6 +105,21 @@ sub make_pinky_window {
 
   $statusLine->XMapWindow ($statusLine->parent);
   $self->refresh;
+  return;
+}
+
+
+sub check_atom_str {
+  my ($self) = @_;
+
+  my $statusLine = $self->{term};
+  my $atom = $statusLine->XInternAtom("_PINKY_NAME", 1);
+  my @ztr = $statusLine->XGetWindowProperty($statusLine->parent, $atom);
+
+  if ($ztr[2]) {
+    $self->{cur}->{name} = $ztr[2];
+    $self->refresh;
+  }
   return;
 }
 
@@ -141,16 +150,18 @@ sub on_init {
   $self->{rs_prefix} = 'pinky';
   $self->{rs_prefix} = $self->rs_text ('pinky-rs-prefix', 'pinky');
 
-  $self->{option} = {};
-  for my $key (keys %urxvt::OPTION) {
-    $self->{option}{$key} = $self->option($urxvt::OPTION{$key});
-  }
-
   # order is important
   $self->option ($urxvt::OPTION{scrollBar}, 0);
   $self->{rs_pinky} = $self->rs_color ('pinky', 3, 0);
-  $self->{perl_ext_blacklist} = join (',-', ',-pinky');
+  return;
+}
 
+
+sub on_configure_notify {
+  my ($self, $event) = @_;
+
+  $self->make_pinky_window ($self->{cur});
+  $self->refresh;
   return;
 }
 
@@ -179,30 +190,20 @@ sub pinky_status_start {
 
   push @{$self->{pinky_line}}, $statusLine;
   $self->make_pinky_window ($statusLine);
+
+  $self->{taimer} = urxvt::timer->new->interval (2)->cb (
+    sub {
+      $self->check_atom_str;
+  });
   return;
 }
 
 
 sub pinky_status_destroy {
-  my ($self, $statusLine) = @_;
+  my ($self) = @_;
 
   $self->{destroy} = urxvt::iw->new->start->cb (sub { $self->destroy });
   return;
-}
-
-
-sub tab_osc_seq_perl {
-  my ($self, $statusLine, $osc) = @_;
-
-  $osc =~ s/^([^;]+)+;?//
-    or return;
-
-  if ($1 eq "update_line") {
-    my ($name) = split /;/, $osc , 1;
-    $statusLine->{name} = $name;
-    $self->refresh;
-  }
-  return 1;
 }
 
 
@@ -223,13 +224,14 @@ package urxvt::ext::pinky::pinky_status;
 
 
 sub on_osc_seq_perl {
-  my ($self, $osc, $resp) = @_;
+  my ($self, $osc) = @_;
 
   return unless $osc =~ s/^pinky;//;
 
-  my $term = $self->{term}->{parent};
-  my $statusLine = $self->{term}->{parent}->{cur};
-  $term->tab_osc_seq_perl($statusLine, $osc);
+  my $statusLine = $self->{term}->{parent};
+  my ($msg) = split /;/, $osc, 0;
 
+  $statusLine->{cur}->{name} = $msg;
+  $statusLine->refresh;
   return 1;
 }
