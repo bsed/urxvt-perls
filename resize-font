@@ -18,11 +18,10 @@
 # urxvt.font: xft:Inconsolata:pixelsize=12
 
 # And re-bind some keymappings (if you want, below are the defaults):
-# URxvt.resize-font.smaller: C-minus
-# URxvt.resize-font.bigger: C-plus
-# URxvt.resize-font.reset: C-equal
-# URxvt.resize-font.show: C-question
-#
+# URxvt.keysym.C-plus:     perl:resize-font:bigger
+# URxvt.keysym.C-minus:    perl:resize-font:smaller
+# URxvt.keysym.C-equal:    perl:resize-font:reset
+# URxvt.keysym.C-question: perl:resize-font:show
 
 my $default_font;
 
