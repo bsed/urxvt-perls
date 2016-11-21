@@ -17,6 +17,9 @@
 # Set your font in ~/.Xresources:
 # urxvt.font: xft:Inconsolata:pixelsize=12
 
+# Activate extension:
+# URxvt.perl-ext-common: ...,resize-font
+
 # And re-bind some keymappings (if you want, below are the defaults):
 # URxvt.keysym.C-plus:     perl:resize-font:bigger
 # URxvt.keysym.C-minus:    perl:resize-font:smaller
