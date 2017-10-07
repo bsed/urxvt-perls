@@ -505,11 +505,10 @@ sub configure {
    my ($self) = @_;
 
    my $tab = $self->{cur};
-
    # this is an extremely dirty way to force a configurenotify, but who cares
    $tab->XMoveResizeWindow (
       $tab->parent,
-      0, $self->{tabheight} + 1,
+      0, $self->{tabheight} - 1,
       $self->width, $self->height - $self->{tabheight}
    );
    $tab->XMoveResizeWindow (
@@ -547,7 +546,7 @@ sub copy_properties {
       # update if changed, we assume empty items and zero type and
       # format will not happen
       $self->XChangeProperty ($self->parent, $atom, $type, $format, $items)
-         if $cur->[0] != $type or $cur->[1] != $format or $cur->[2] ne $items;
+        if $cur->[0] != $type or $cur->[1] != $format or $cur->[2] ne $items;
 
       $self->{current_properties}{$atom} = [$type, $format, $items];
    }
@@ -580,32 +579,34 @@ sub rs_color($$$$) {
 sub make_current {
     my ($self, $tab) = @_;
 
+    #$self->{currently_switching} = 1;
     my $cur = $self->{cur};
     if ($cur != $tab) {
       if ($cur) {
         delete $cur->{last_activity};
         delete $cur->{bell_rung};
-        $cur->XUnmapWindow ($cur->parent) if $cur->mapped;
-        $cur->focus_out;
+        #$cur->focus_out;
+        #$cur->XUnmapWindow ($cur->parent) if $cur->mapped;
+        $cur->XUnmapWindow ($cur->parent);
       }
 
       $self->{cur} = $tab;
 
       $self->configure;
       $self->copy_properties;
-
-      $tab->focus_out; # just in case, should be a nop
-      $tab->focus_in if $self->focus;
-
-      $tab->XMapWindow ($tab->parent);
-
       #$tab->focus_out; # just in case, should be a nop
       #$tab->focus_in if $self->focus;
-
+      $tab->focus_in;
+      $tab->XMapWindow ($tab->parent);
+      #$tab->focus_out; # just in case, should be a nop
+      #$tab->focus_in if $self->focus;
+      #sleep 1;
       delete $tab->{last_activity};
       delete $tab->{bell_rung};
     }
+
     $self->refresh;
+    #$self->{currently_switching} = 0;
     ();
 }
 
@@ -631,37 +632,37 @@ sub on_tt_write {
 }
 
 sub on_key_press {
-   my ($self, $event) = @_;
-   $self->key_event('key_press', $event);
+  my ($self, $event) = @_;
+  #return if ($self->{currently_switching} == 1);
+  $self->key_event('key_press', $event);
 }
 
 sub on_key_release {
-   my ($self, $event) = @_;
-   $self->key_event('key_release', $event);
+  my ($self, $event) = @_;
+  $self->key_event('key_release', $event);
 }
 
 sub key_event {
-	my ($self, $type, $event) = @_;
-	my $term = $self->{cur};
-	$term->$type($event->{state}, $event->{keycode}, $event->{time});
+  my ($self, $type, $event) = @_;
+  my $term = $self->{cur};
+  $term->$type($event->{state}, $event->{keycode}, $event->{time});
 
-	# refresh_check is available since rxvt-unicode 9.22.  For some reason
-	# $term->can('refresh_check') doesn’t work which is why eval block is
-	# used to silence warnings.
-	eval {
-		$term->refresh_check;
-	};
-	if ($@ && $@ !~ /refresh_check/) {
-		# If there was a warning unrelated to refresh_check propagate
-		# it.  Otherwise ignore.
-		warn "$@";
-	}
-	1;
+  # refresh_check is available since rxvt-unicode 9.22.  For some reason
+  # $term->can('refresh_check') doesn’t work which is why eval block is
+  # used to silence warnings.
+  eval {
+    $term->refresh_check;
+  };
+  if ($@ && $@ !~ /refresh_check/) {
+    # If there was a warning unrelated to refresh_check propagate
+    # it.  Otherwise ignore.
+    warn "$@";
+  }
+  1;
 }
 
 sub on_button_release {
    my ($self, $event) = @_;
-
    if (!$self->{is_inputting_name} && $event->{row} == 0) {
       my $col = $event->{col};
       for my $button (@{ $self->{tabofs} }) {
@@ -679,7 +680,7 @@ sub on_button_release {
 }
 
 sub register_keysyms {
-    my ($self, $tab) = @_;
+  my ($self, $tab) = @_;
     if (!$self->{no_default_keys}) {
         $tab //= $self;
         $tab->parse_keysym('Shift-Left', 'perl:tabbedex:prev_tab');
@@ -831,7 +832,6 @@ sub on_wm_delete_window {
 
 sub tab_start {
    my ($self, $tab) = @_;
-
    $tab->XChangeInput ($tab->parent, urxvt::PropertyChangeMask);
 
    push @{ $self->{tabs} }, $tab;
@@ -913,7 +913,6 @@ sub tab_add_lines {
 
 sub tab_user_command {
   my ($self, $tab, $cmd, $proxy_events) = @_;
-
   if ($cmd eq 'tabbedex:new_tab') {
     if (!$self->{is_inputting_name}) {
       $self->new_tab;
@@ -960,7 +959,8 @@ sub change_tab {
         my $idx = 0;
         ++$idx while $self->{tabs}[$idx] != $tab;
         $idx += $direction;
-        $self->make_current ($self->{tabs}[$idx % @{ $self->{tabs}}]);
+        $idx = $idx % @{ $self->{tabs}};
+        $self->make_current ($self->{tabs}[$idx]);
     }
 
     ();
